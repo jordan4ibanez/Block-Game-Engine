@@ -1,12 +1,17 @@
 --this is a game engine made from the physics tutorial (https://love2d.org/wiki/Tutorial:PhysicsCollisionCallbacks)
 
+--[[ PROBLEMS FOUND:
+-You cannot resize an object, it will not use friction anymore
+
+]]--
+
 dofile("helpers.lua")
 
 print(dump("test"))
 
-block = {}
-map_size = {10,10}
-object_table = {}
+block = {} --function table - holds functions
+map_size = {10,10} --the size of the map x and y
+object_table = {} --holds all the objects
 
 
 --creates balls - hard bodies - sample test of object handling engine
@@ -23,18 +28,22 @@ function block.create_ball(posx,posy,type,mass,size,bounciness)
         print("created ball"..tostring(id))
 end
 
+function block.create_block(posx,posy,type,mass,sizex,sizey,bounciness)
+	local id = table.getn(object_table) 
+	object_table["block"..id] = {}
+        object_table["block"..id].b = love.physics.newBody(world, posx,posy, type)
+        object_table["block"..id].s = love.physics.newRectangleShape(200,50)
+        object_table["block"..id].f = love.physics.newFixture(object_table["block"..id].b, object_table["block"..id].s)
+        object_table["block"..id].f:setUserData("block"..id)
+end
 
 function love.load()
     world = love.physics.newWorld(0, 200, true)
         world:setCallbacks(beginContact, endContact, preSolve, postSolve)
  
-    block.create_ball(400,300,"dynamic",20,50,0.3)
-    
-    static = {}
-        static.b = love.physics.newBody(world, 400,400, "static")
-        static.s = love.physics.newRectangleShape(200,50)
-        static.f = love.physics.newFixture(static.b, static.s)
-        static.f:setUserData("Block")
+    block.create_ball(400,200,"dynamic",20,50,0.3)
+
+	block.create_block(400,400,"static",0,200,50,0)
  
     text       = ""   -- we'll use this to put info text on the screen later
     persisting = 0    -- we'll use this to store the state of repeated callback calls
@@ -74,10 +83,12 @@ function love.draw()
 
 		if obj.f:getUserData() and string.find(obj.f:getUserData(), "ball") then
 			love.graphics.circle("line", obj.b:getX(),obj.b:getY(), obj.s:getRadius(), 20)
+		elseif obj.f:getUserData() and string.find(obj.f:getUserData(), "block") then
+			love.graphics.polygon("line", obj.b:getWorldPoints(obj.s:getPoints()))
 		end
 	end
 	--end
-    love.graphics.polygon("line", static.b:getWorldPoints(static.s:getPoints()))
+
  
     love.graphics.print(text, 10, 10)
 end
@@ -86,24 +97,26 @@ function beginContact(a, b, coll)
     x,y = coll:getNormal()
     if a:getUserData() and b:getUserData() then
 		text = text.."\n"..a:getUserData().." colliding with "..b:getUserData().." with a vector normal of: "..x..", "..y
+		--print(object_table[a:getUserData()].b:getType())
+		--object_table[a:getUserData()].b:applyForce(1000, 0)
 	end
 end
  
 function endContact(a, b, coll)
 	if a:getUserData() and b:getUserData() then
-    persisting = 0
-    text = text.."\n"..a:getUserData().." uncolliding with "..b:getUserData()
+		--persisting = 0
+		--text = text.."\n"..a:getUserData().." uncolliding with "..b:getUserData()
 	end
 end
  
 function preSolve(a, b, coll)
 	if a:getUserData() and b:getUserData() then
     if persisting == 0 then    -- only say when they first start touching
-        text = text.."\n"..a:getUserData().." touching "..b:getUserData()
+        --text = text.."\n"..a:getUserData().." touching "..b:getUserData()
     elseif persisting < 20 then    -- then just start counting
-        text = text.." "..persisting
+        --text = text.." "..persisting
     end
-    persisting = persisting + 1    -- keep track of how many updates they've been touching for
+    --persisting = persisting + 1    -- keep track of how many updates they've been touching for
 	end
 end
  

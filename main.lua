@@ -19,6 +19,7 @@ function block.create_ball(posx,posy,type,mass,size,bounciness)
         object_table["ball"..id].f = love.physics.newFixture(object_table["ball"..id].b, object_table["ball"..id].s)
         object_table["ball"..id].f:setRestitution(bounciness)    -- make it bouncy
         object_table["ball"..id].f:setUserData("ball"..tostring(id))
+        object_table["ball"..id].b:setFixedRotation( false )
         print("created ball"..tostring(id))
 end
 
@@ -45,11 +46,10 @@ function love.update(dt)
  
     if love.keyboard.isDown("f") then
       i = i + 1
-      object_table.ball.s = love.physics.newCircleShape(i)
-      object_table.ball.f = love.physics.newFixture(object_table.ball.b, object_table.ball.s)
+	  local ball_shape = object_table["ball0"].f:getShape()
+	  ball_shape:setRadius(i)
+	  object_table["ball0"].s = love.physics.newCircleShape(i)
 
-      object_table.ball.f:setUserData("Ball")
-      object_table.ball.f:setUserData("Ball")
     end
  
     if love.keyboard.isDown("right") then
@@ -69,11 +69,14 @@ function love.update(dt)
 end
  
 function love.draw()
+	--if table.getn(object_table) > 0 then
 	for _,obj in pairs(object_table) do
-		if string.find(obj.f:getUserData(), "ball") then
+
+		if obj.f:getUserData() and string.find(obj.f:getUserData(), "ball") then
 			love.graphics.circle("line", obj.b:getX(),obj.b:getY(), obj.s:getRadius(), 20)
 		end
 	end
+	--end
     love.graphics.polygon("line", static.b:getWorldPoints(static.s:getPoints()))
  
     love.graphics.print(text, 10, 10)
@@ -81,21 +84,27 @@ end
  
 function beginContact(a, b, coll)
     x,y = coll:getNormal()
-    text = text.."\n"..a:getUserData().." colliding with "..b:getUserData().." with a vector normal of: "..x..", "..y
+    if a:getUserData() and b:getUserData() then
+		text = text.."\n"..a:getUserData().." colliding with "..b:getUserData().." with a vector normal of: "..x..", "..y
+	end
 end
  
 function endContact(a, b, coll)
+	if a:getUserData() and b:getUserData() then
     persisting = 0
     text = text.."\n"..a:getUserData().." uncolliding with "..b:getUserData()
+	end
 end
  
 function preSolve(a, b, coll)
+	if a:getUserData() and b:getUserData() then
     if persisting == 0 then    -- only say when they first start touching
         text = text.."\n"..a:getUserData().." touching "..b:getUserData()
     elseif persisting < 20 then    -- then just start counting
         text = text.." "..persisting
     end
     persisting = persisting + 1    -- keep track of how many updates they've been touching for
+	end
 end
  
 function postSolve(a, b, coll, normalimpulse, tangentimpulse)

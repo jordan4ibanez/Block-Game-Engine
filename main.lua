@@ -20,10 +20,12 @@ id = 0
 posx,posy = 0,0
 
 function love.wheelmoved(x, y)
-    if y > 0 then
+    if y > 0 and graphics_scale < 3 then
         text = "Mouse wheel moved up"
-    elseif y < 0 then
+        graphics_scale = graphics_scale + 0.1
+    elseif y < 0  and graphics_scale > 0.5 then
         text = "Mouse wheel moved down"
+        graphics_scale = graphics_scale - 0.1
     end
 end
 
@@ -129,11 +131,12 @@ function love.update(dt)
     end
 end
 
+graphics_scale = 1
 
 function love.draw()
 	local translationx,translationy = object_table["block0"].b:getPosition()
-	love.graphics.scale(0.5, 0.5)
-	love.graphics.translate(-translationx+(love.graphics.getWidth( )/2), -translationy+(love.graphics.getHeight( )/2))
+	love.graphics.scale(graphics_scale, graphics_scale)
+	love.graphics.translate(-translationx+((love.graphics.getWidth( )/2)/graphics_scale), -translationy+((love.graphics.getHeight( )/2)/graphics_scale))
 	--if table.getn(object_table) > 0 then
 	for _,obj in pairs(object_table) do
 
@@ -148,8 +151,13 @@ function love.draw()
 	love.graphics.push( )
 	love.graphics.pop()   -- return to stored coordinated
 	love.graphics.scale(2, 2)
-	love.graphics.translate((translationx/2)-(love.graphics.getWidth( )/4), (translationy/2)-(love.graphics.getHeight( )/4))
-    love.graphics.print(text, 10, 10)
+	
+	--begin default coordinates
+	--love.graphics.translate((translationx/2)-(love.graphics.getWidth( )/4), (translationy/2)-(love.graphics.getHeight( )/4))
+	love.graphics.translate((translationx/2)-(love.graphics.getWidth( )/(graphics_scale*4)), (translationy/2)-(love.graphics.getHeight( )/(graphics_scale*4)))
+    love.graphics.print(text, 10, 30)
+    
+    love.graphics.print("FPS:"..tostring(love.timer.getFPS( )),10,10)
 end
  
 function beginContact(a, b, coll)
@@ -160,11 +168,11 @@ function beginContact(a, b, coll)
 		--allow each to apply friction to eachother
 		
 		if object_table[a:getUserData()].b:getType() ~= "static" then
-			print("a is world actor")
+			--print("a is world actor")
 		end
 		
 		if object_table[b:getUserData()].b:getType() ~= "static" then
-			print("b is world actor")
+			--print("b is world actor")
 		end
 		
 		--object_table[a:getUserData()].b:applyForce(1000, 0)
@@ -174,7 +182,7 @@ end
 function endContact(a, b, coll)
 	if a:getUserData() and b:getUserData() then
 		--persisting = 0
-		print(object_table[a:getUserData()].b:getType())
+		--print(object_table[a:getUserData()].b:getType())
 		--text = text.."\n"..a:getUserData().." uncolliding with "..b:getUserData()
 	end
 end

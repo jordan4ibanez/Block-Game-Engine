@@ -46,7 +46,7 @@ function block.create_block(posx,posy,type,mass,sizex,sizey,bounciness,rotates)
 	--local id = table.getn(object_table) 
 	object_table["block"..id] = {}
         object_table["block"..id].b = love.physics.newBody(world, posx,posy, type)
-        if rotates == true then
+        if rotates == false then
 			object_table["block"..id].b:setFixedRotation(true)
 		end
         object_table["block"..id].s = love.physics.newRectangleShape(sizex,sizey)
@@ -62,7 +62,7 @@ function love.load()
         world:setCallbacks(beginContact, endContact, preSolve, postSolve)
  
     --block.create_block(200,-200,"dynamic",20,50,0.3)
-	block.create_block(400,-200,"dynamic",1,40,80,0,true)
+	block.create_block(400,-200,"dynamic",1,40,80,0,false)
 	--create sample "chunk"
 	anchor = {0,0} --this is where the chunk begins - top left -
 	for x = 1,map_size[1] do
@@ -76,6 +76,26 @@ function love.load()
     text       = ""   -- we'll use this to put info text on the screen later
     persisting = 0    -- we'll use this to store the state of repeated callback calls
 end
+
+
+function love.keypressed( key, scancode, isrepeat )
+
+    -- ignore non-printable characters (see http://www.ascii-code.com/)
+    if key == "e" then
+		block.create_block(posx+math.random(-30,30),posy - math.random(50,100),"dynamic",1,20,20,0,true)
+    end
+    --[[ typing test
+    if key == "space" then
+        text = text .. " "
+    elseif key == "return" then
+		text = text .. "\n"
+	else
+		text = text .. key
+		
+    end
+    ]]--
+end
+ 
  
 i = 0
 function love.update(dt)
@@ -108,7 +128,8 @@ function love.update(dt)
         text = ""
     end
 end
- 
+
+
 function love.draw()
 	local translationx,translationy = object_table["block0"].b:getPosition()
 	love.graphics.scale(0.5, 0.5)

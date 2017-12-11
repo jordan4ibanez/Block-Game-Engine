@@ -11,6 +11,7 @@ print(dump("test"))
 
 block = {} --function table - holds functions
 map_size = {10,10} --the size of the map x and y
+block_size = 10 --x and y of blocks
 object_table = {} --holds all the objects
 
 
@@ -96,8 +97,18 @@ end
 function beginContact(a, b, coll)
     x,y = coll:getNormal()
     if a:getUserData() and b:getUserData() then
-		text = text.."\n"..a:getUserData().." colliding with "..b:getUserData().." with a vector normal of: "..x..", "..y
-		--print(object_table[a:getUserData()].b:getType())
+		--text = text.."\n"..a:getUserData().." colliding with "..b:getUserData().." with a vector normal of: "..x..", "..y
+		
+		--ALLOW each to apply friction to eachother
+		
+		if object_table[a:getUserData()].b:getType() ~= "static" then
+			print("a is world actor")
+		end
+		
+		if object_table[b:getUserData()].b:getType() ~= "static" then
+			print("b is world actor")
+		end
+		
 		--object_table[a:getUserData()].b:applyForce(1000, 0)
 	end
 end
@@ -105,6 +116,7 @@ end
 function endContact(a, b, coll)
 	if a:getUserData() and b:getUserData() then
 		--persisting = 0
+		print(object_table[a:getUserData()].b:getType())
 		--text = text.."\n"..a:getUserData().." uncolliding with "..b:getUserData()
 	end
 end

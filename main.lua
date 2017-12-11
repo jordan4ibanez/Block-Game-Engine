@@ -11,7 +11,7 @@ print(dump("test"))
 
 block = {} --function table - holds functions
 map_size = {10,10} --the size of the map x and y
-block_size = 20 --x and y of blocks
+block_size = 80 --x and y of blocks
 object_table = {} --holds all the objects
 id = 0
 
@@ -61,15 +61,16 @@ function love.load()
     persisting = 0    -- we'll use this to store the state of repeated callback calls
 end
  
-i = 50
+i = 0
 function love.update(dt)
     world:update(dt)
  
     if love.keyboard.isDown("f") then
       i = i + 1
-	  local ball_shape = object_table["ball0"].f:getShape()
-	  ball_shape:setRadius(i)
-	  object_table["ball0"].s = love.physics.newCircleShape(i)
+      
+	  --local ball_shape = object_table["ball0"].f:getShape()
+	  --ball_shape:setRadius(i)
+	  --object_table["ball0"].s = love.physics.newCircleShape(i)
 
     end
  
@@ -90,6 +91,8 @@ function love.update(dt)
 end
  
 function love.draw()
+	local translationx,translationy = object_table["ball0"].b:getPosition()
+	love.graphics.translate(-translationx+(love.graphics.getWidth( )/2), -translationy+(love.graphics.getHeight( )/2))
 	--if table.getn(object_table) > 0 then
 	for _,obj in pairs(object_table) do
 
@@ -110,7 +113,7 @@ function beginContact(a, b, coll)
     if a:getUserData() and b:getUserData() then
 		--text = text.."\n"..a:getUserData().." colliding with "..b:getUserData().." with a vector normal of: "..x..", "..y
 		
-		--ALLOW each to apply friction to eachother
+		--allow each to apply friction to eachother
 		
 		if object_table[a:getUserData()].b:getType() ~= "static" then
 			print("a is world actor")

@@ -12,10 +12,11 @@ dofile("helpers.lua")
 print(dump("test"))
 
 block = {} --function table - holds functions
-map_size = {32,32} --the size of the map x and y
+map_size = {31,31} --the size of the map x and y -- starts at 0
 block_size = 80 --x and y of blocks
 object_table = {} --holds all the objects
 id = 0
+blockposx,blockposy = 0,0
 
 posx,posy = 0,0
 
@@ -44,6 +45,7 @@ function block.create_ball(posx,posy,type,mass,size,bounciness)
         id = id + 1
 end
 
+--creates blocks "rectangles"
 function block.create_block(posx,posy,type,mass,sizex,sizey,bounciness,rotates)
 	--local id = table.getn(object_table) 
 	object_table["block"..id] = {}
@@ -67,9 +69,9 @@ function love.load()
 	block.create_block(400,-200,"dynamic",1,40,80,0,false)
 	--create sample "chunk"
 	anchor = {0,0} --this is where the chunk begins - top left -
-	for x = 1,map_size[1] do
-	for y = 1,map_size[2] do
-		print(anchor[1])
+	for x = 0,map_size[1] do
+	for y = 0,map_size[2] do
+		--print(anchor[1])
 		--block.create_block(anchor[1],anchor[2],"static",0,5,5,0)
 		block.create_block(anchor[1]+(x*block_size),anchor[2]+(y*block_size),"static",0,block_size,block_size,0,false)
 	end
@@ -84,7 +86,7 @@ function love.keypressed( key, scancode, isrepeat )
 
     -- ignore non-printable characters (see http://www.ascii-code.com/)
     if key == "e" then
-		block.create_block(posx+math.random(-30,30),posy - math.random(50,100),"dynamic",1,20,20,0,true)
+		--block.create_block(posx+math.random(-30,30),posy - math.random(50,100),"dynamic",1,20,20,0,false)
     end
     --[[ typing test
     if key == "space" then
@@ -103,16 +105,27 @@ i = 0
 function love.update(dt)
 	local mousex, mousey = love.mouse.getPosition()
 	posx,posy = object_table["block0"].b:getPosition()
+	local realmx,realmy = (posx+(mousex-(love.graphics.getWidth( )/2))/graphics_scale),(posy+(mousey-(love.graphics.getHeight( )/2))/graphics_scale)
+	blockposx,blockposy = math.floor((realmx/block_size) + 0.5),math.floor((realmy/block_size) + 0.5)
+	
+	
+	--print(realmx,realmy)
+	
+	--print(blockposx,blockposy)
 	--print(mousex-(love.graphics.getWidth( )/2)+math.floor(posx),mousey-(love.graphics.getHeight( )/2)+math.floor(posy))
     world:update(dt)
  
-    if love.keyboard.isDown("f") then
-      i = i + 1
+    --if love.keyboard.isDown("f") then
+     -- i = i + 1
       
 	  --local ball_shape = object_table["ball0"].f:getShape()
 	  --ball_shape:setRadius(i)
 	  --object_table["ball0"].s = love.physics.newCircleShape(i)
 
+    --end
+ 
+	if  love.keyboard.isDown("e") then
+		block.create_block(posx+math.random(-30,30),posy - math.random(50,100),"dynamic",1,20,20,0,true)
     end
  
     if love.keyboard.isDown("d") then
@@ -144,9 +157,16 @@ function love.draw()
 			love.graphics.circle("line", obj.b:getX(),obj.b:getY(), obj.s:getRadius(), 20)
 		elseif obj.f:getUserData() and string.find(obj.f:getUserData(), "block") then
 			love.graphics.polygon("line", obj.b:getWorldPoints(obj.s:getPoints()))
+			
+			--print(dump(obj.b:getWorldPoints(obj.s:getPoints())))
+			--print("________")
 		end
 	end
 	--end
+	
+	--debug selection				---x1                                   y1                                    x2                                     y2                                    x3                                      y3                                     x4                                    y4
+	love.graphics.polygon('fill', (blockposx*block_size)-(block_size/2), (blockposy*block_size)-(block_size/2), (blockposx*block_size)+(block_size/2), (blockposy*block_size)-(block_size/2), (blockposx*block_size)+(block_size/2), (blockposy*block_size)+(block_size/2), (blockposx*block_size)-(block_size/2),(blockposy*block_size)+(block_size/2))
+	--love.graphics.polygon('fill',10,10,50,10,50,50,10,50)
 	
 	love.graphics.push( )
 	love.graphics.pop()   -- return to stored coordinated
@@ -158,6 +178,7 @@ function love.draw()
     love.graphics.print(text, 10, 30)
     
     love.graphics.print("FPS:"..tostring(love.timer.getFPS( )),10,10)
+    love.graphics.print("MX:"..tostring(blockposx).." | MY:"..tostring(blockposy),10,20)
 end
  
 function beginContact(a, b, coll)

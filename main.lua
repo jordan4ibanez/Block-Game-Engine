@@ -49,8 +49,8 @@ function love.load()
     world = love.physics.newWorld(0, 400, true) --set 400 to 980 for earth gravity
         world:setCallbacks(beginContact, endContact, preSolve, postSolve)
  
-    block.create_ball(200,-200,"dynamic",20,50,0.3)
-	
+    --block.create_block(200,-200,"dynamic",20,50,0.3)
+	block.create_block(400,-200,"dynamic",1,40,80,0)
 	--create sample "chunk"
 	anchor = {0,0} --this is where the chunk begins - top left -
 	for x = 1,map_size[1] do
@@ -68,7 +68,7 @@ end
 i = 0
 function love.update(dt)
 	local mousex, mousey = love.mouse.getPosition()
-	posx,posy = object_table["ball0"].b:getPosition()
+	posx,posy = object_table["block0"].b:getPosition()
 	print(mousex-(love.graphics.getWidth( )/2)+math.floor(posx),mousey-(love.graphics.getHeight( )/2)+math.floor(posy))
     world:update(dt)
  
@@ -82,14 +82,14 @@ function love.update(dt)
     end
  
     if love.keyboard.isDown("d") then
-         object_table["ball0"].b:applyForce(1000, 0)
+         object_table["block0"].b:applyForce(1000, 0)
     elseif love.keyboard.isDown("a") then
-        object_table["ball0"].b:applyForce(-1000, 0)
+        object_table["block0"].b:applyForce(-1000, 0)
     end
     if love.keyboard.isDown("w") then
-        object_table["ball0"].b:applyForce(0, -5000)	
+        object_table["block0"].b:applyForce(0, -5000)	
     elseif love.keyboard.isDown("s") then
-        object_table["ball0"].b:applyForce(0, 1000)
+        object_table["block0"].b:applyForce(0, 1000)
     end
  
     if string.len(text) > 768 then    -- cleanup when 'text' gets too long
@@ -98,7 +98,7 @@ function love.update(dt)
 end
  
 function love.draw()
-	local translationx,translationy = object_table["ball0"].b:getPosition()
+	local translationx,translationy = object_table["block0"].b:getPosition()
 	love.graphics.translate(-translationx+(love.graphics.getWidth( )/2), -translationy+(love.graphics.getHeight( )/2))
 	--if table.getn(object_table) > 0 then
 	for _,obj in pairs(object_table) do

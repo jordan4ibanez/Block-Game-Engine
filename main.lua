@@ -19,6 +19,14 @@ id = 0
 
 posx,posy = 0,0
 
+function love.wheelmoved(x, y)
+    if y > 0 then
+        text = "Mouse wheel moved up"
+    elseif y < 0 then
+        text = "Mouse wheel moved down"
+    end
+end
+
 --creates balls - hard bodies - sample test of object handling engine
 function block.create_ball(posx,posy,type,mass,size,bounciness)
 	--local id = table.getn(object_table) --auto get ids of table - this has a limit of 32 bit or 64 bit integer
@@ -34,13 +42,17 @@ function block.create_ball(posx,posy,type,mass,size,bounciness)
         id = id + 1
 end
 
-function block.create_block(posx,posy,type,mass,sizex,sizey,bounciness)
+function block.create_block(posx,posy,type,mass,sizex,sizey,bounciness,rotates)
 	--local id = table.getn(object_table) 
 	object_table["block"..id] = {}
         object_table["block"..id].b = love.physics.newBody(world, posx,posy, type)
+        if rotates == true then
+			object_table["block"..id].b:setFixedRotation(true)
+		end
         object_table["block"..id].s = love.physics.newRectangleShape(sizex,sizey)
         object_table["block"..id].f = love.physics.newFixture(object_table["block"..id].b, object_table["block"..id].s)
         object_table["block"..id].f:setUserData("block"..id)
+        
         
         id = id + 1
 end
@@ -50,14 +62,14 @@ function love.load()
         world:setCallbacks(beginContact, endContact, preSolve, postSolve)
  
     --block.create_block(200,-200,"dynamic",20,50,0.3)
-	block.create_block(400,-200,"dynamic",1,40,80,0)
+	block.create_block(400,-200,"dynamic",1,40,80,0,true)
 	--create sample "chunk"
 	anchor = {0,0} --this is where the chunk begins - top left -
 	for x = 1,map_size[1] do
 	for y = 1,map_size[2] do
 		print(anchor[1])
 		--block.create_block(anchor[1],anchor[2],"static",0,5,5,0)
-		block.create_block(anchor[1]+(x*block_size),anchor[2]+(y*block_size),"static",0,block_size,block_size,0)
+		block.create_block(anchor[1]+(x*block_size),anchor[2]+(y*block_size),"static",0,block_size,block_size,0,false)
 	end
 	end
  
@@ -69,7 +81,7 @@ i = 0
 function love.update(dt)
 	local mousex, mousey = love.mouse.getPosition()
 	posx,posy = object_table["block0"].b:getPosition()
-	print(mousex-(love.graphics.getWidth( )/2)+math.floor(posx),mousey-(love.graphics.getHeight( )/2)+math.floor(posy))
+	--print(mousex-(love.graphics.getWidth( )/2)+math.floor(posx),mousey-(love.graphics.getHeight( )/2)+math.floor(posy))
     world:update(dt)
  
     if love.keyboard.isDown("f") then
@@ -99,6 +111,7 @@ end
  
 function love.draw()
 	local translationx,translationy = object_table["block0"].b:getPosition()
+	love.graphics.scale(0.5, 0.5)
 	love.graphics.translate(-translationx+(love.graphics.getWidth( )/2), -translationy+(love.graphics.getHeight( )/2))
 	--if table.getn(object_table) > 0 then
 	for _,obj in pairs(object_table) do
@@ -110,8 +123,11 @@ function love.draw()
 		end
 	end
 	--end
-
- 
+	
+	love.graphics.push( )
+	love.graphics.pop()   -- return to stored coordinated
+	love.graphics.scale(2, 2)
+	love.graphics.translate((translationx/2)-(love.graphics.getWidth( )/4), (translationy/2)-(love.graphics.getHeight( )/4))
     love.graphics.print(text, 10, 10)
 end
  

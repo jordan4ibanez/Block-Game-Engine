@@ -1,4 +1,6 @@
---this is a game engine made from the physics tutorial (https://love2d.org/wiki/Tutorial:PhysicsCollisionCallbacks)
+--This is a game engine made from the physics tutorial (https://love2d.org/wiki/Tutorial:PhysicsCollisionCallbacks)
+
+--This engine is very literal. If you place your player at 0,0 (x,y) in the world, the center of them will be at 0,0
 
 --[[ PROBLEMS FOUND:
 -You cannot resize an object, it will not use friction anymore
@@ -10,10 +12,12 @@ dofile("helpers.lua")
 print(dump("test"))
 
 block = {} --function table - holds functions
-map_size = {10,10} --the size of the map x and y
+map_size = {32,32} --the size of the map x and y
 block_size = 80 --x and y of blocks
 object_table = {} --holds all the objects
 id = 0
+
+posx,posy = 0,0
 
 --creates balls - hard bodies - sample test of object handling engine
 function block.create_ball(posx,posy,type,mass,size,bounciness)
@@ -42,15 +46,15 @@ function block.create_block(posx,posy,type,mass,sizex,sizey,bounciness)
 end
 
 function love.load()
-    world = love.physics.newWorld(0, 200, true)
+    world = love.physics.newWorld(0, 400, true) --set 400 to 980 for earth gravity
         world:setCallbacks(beginContact, endContact, preSolve, postSolve)
  
-    block.create_ball(400,200,"dynamic",20,50,0.3)
+    block.create_ball(200,-200,"dynamic",20,50,0.3)
 	
 	--create sample "chunk"
-	anchor = {250,400}
-	for x = 1,10 do
-	for y = 1,10 do
+	anchor = {0,0} --this is where the chunk begins - top left -
+	for x = 1,map_size[1] do
+	for y = 1,map_size[2] do
 		print(anchor[1])
 		--block.create_block(anchor[1],anchor[2],"static",0,5,5,0)
 		block.create_block(anchor[1]+(x*block_size),anchor[2]+(y*block_size),"static",0,block_size,block_size,0)
@@ -63,6 +67,9 @@ end
  
 i = 0
 function love.update(dt)
+	local mousex, mousey = love.mouse.getPosition()
+	posx,posy = object_table["ball0"].b:getPosition()
+	print(mousex-(love.graphics.getWidth( )/2)+math.floor(posx),mousey-(love.graphics.getHeight( )/2)+math.floor(posy))
     world:update(dt)
  
     if love.keyboard.isDown("f") then
@@ -74,14 +81,14 @@ function love.update(dt)
 
     end
  
-    if love.keyboard.isDown("right") then
+    if love.keyboard.isDown("d") then
          object_table["ball0"].b:applyForce(1000, 0)
-    elseif love.keyboard.isDown("left") then
+    elseif love.keyboard.isDown("a") then
         object_table["ball0"].b:applyForce(-1000, 0)
     end
-    if love.keyboard.isDown("up") then
+    if love.keyboard.isDown("w") then
         object_table["ball0"].b:applyForce(0, -5000)	
-    elseif love.keyboard.isDown("down") then
+    elseif love.keyboard.isDown("s") then
         object_table["ball0"].b:applyForce(0, 1000)
     end
  

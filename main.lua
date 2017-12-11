@@ -11,13 +11,13 @@ print(dump("test"))
 
 block = {} --function table - holds functions
 map_size = {10,10} --the size of the map x and y
-block_size = 10 --x and y of blocks
+block_size = 20 --x and y of blocks
 object_table = {} --holds all the objects
-
+id = 0
 
 --creates balls - hard bodies - sample test of object handling engine
 function block.create_ball(posx,posy,type,mass,size,bounciness)
-	local id = table.getn(object_table) --auto get ids of table - this has a limit of 32 bit or 64 bit integer
+	--local id = table.getn(object_table) --auto get ids of table - this has a limit of 32 bit or 64 bit integer
 	object_table["ball"..id] = {}
         object_table["ball"..id].b = love.physics.newBody(world, posx,posy, type)
         object_table["ball"..id].b:setMass(mass)
@@ -26,16 +26,19 @@ function block.create_ball(posx,posy,type,mass,size,bounciness)
         object_table["ball"..id].f:setRestitution(bounciness)    -- make it bouncy
         object_table["ball"..id].f:setUserData("ball"..tostring(id))
         object_table["ball"..id].b:setFixedRotation( false )
-        print("created ball"..tostring(id))
+        --print("created ball"..tostring(id))
+        id = id + 1
 end
 
 function block.create_block(posx,posy,type,mass,sizex,sizey,bounciness)
-	local id = table.getn(object_table) 
+	--local id = table.getn(object_table) 
 	object_table["block"..id] = {}
         object_table["block"..id].b = love.physics.newBody(world, posx,posy, type)
-        object_table["block"..id].s = love.physics.newRectangleShape(200,50)
+        object_table["block"..id].s = love.physics.newRectangleShape(sizex,sizey)
         object_table["block"..id].f = love.physics.newFixture(object_table["block"..id].b, object_table["block"..id].s)
         object_table["block"..id].f:setUserData("block"..id)
+        
+        id = id + 1
 end
 
 function love.load()
@@ -43,8 +46,16 @@ function love.load()
         world:setCallbacks(beginContact, endContact, preSolve, postSolve)
  
     block.create_ball(400,200,"dynamic",20,50,0.3)
-
-	block.create_block(400,400,"static",0,200,50,0)
+	
+	--create sample "chunk"
+	anchor = {250,400}
+	for x = 1,10 do
+	for y = 1,10 do
+		print(anchor[1])
+		--block.create_block(anchor[1],anchor[2],"static",0,5,5,0)
+		block.create_block(anchor[1]+(x*block_size),anchor[2]+(y*block_size),"static",0,block_size,block_size,0)
+	end
+	end
  
     text       = ""   -- we'll use this to put info text on the screen later
     persisting = 0    -- we'll use this to store the state of repeated callback calls
